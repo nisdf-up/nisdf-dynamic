@@ -1,0 +1,10 @@
+'use client'
+import { useEffect, useMemo, useState } from 'react'
+import Section from '../../components/Section'
+export default function DonatePage(){
+  const vpa=process.env.NEXT_PUBLIC_UPI_VPA; const pname=process.env.NEXT_PUBLIC_UPI_PNAME||'NISDF'
+  const [amount,setAmount]=useState(500); const [custom,setCustom]=useState(''); const finalAmount=useMemo(()=>Number(custom||amount||0),[custom,amount])
+  useEffect(()=>{ const s=document.createElement('script'); s.src='https://checkout.razorpay.com/v1/checkout.js'; document.body.appendChild(s) },[])
+  async function pay(){ const res=await fetch('/api/payments/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({ purpose:'donation', amount: finalAmount })}); const data=await res.json(); if(!res.ok){ alert('Error: '+data.error); return } if(data.provider==='razorpay'){ const rz=new window.Razorpay({ key:data.key_id, amount:data.amount_paise, currency:'INR', name:'NISDF Donation', order_id:data.order_id, handler:()=>alert('Thanks!') }); rz.open() } else { window.location.href=`upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(pname)}&am=${encodeURIComponent(finalAmount)}&cu=INR&tn=Donation` } }
+  const qrSrc=`/api/upi-qr?am=${finalAmount}&tn=NISDF%20Donation`
+  return (<Section title="Donate"><div className="grid md:grid-cols-2 gap-8"><div><div className="flex gap-2 mb-3">{[100,500,1000].map(v=>(<button key={v} onClick={()=>{setAmount(v);setCustom('')}} className={'px-3 py-2 rounded border '+(finalAmount===v?'bg-blue-600 text-white':'')}>{v}</button>))}<input value={custom} onChange={e=>setCustom(e.target.value)} placeholder="Custom" className="border p-2 rounded w-32" /></div><img src={qrSrc} alt="UPI QR" className="border rounded w-64 h-64 object-contain mb-2" /><div className="flex gap-2"><button onClick={pay} className="bg-green-600 text-white px-4 py-2 rounded">Pay via UPI / Razorpay</button><a href="/assets/upi-qr.jpg" className="px-4 py-2 border rounded" target="_blank">Static QR</a></div></div><div className="text-sm text-gray-600">Scan or click to pay. With Razorpay keys, payment auto-verifies.</div></div></Section>) }

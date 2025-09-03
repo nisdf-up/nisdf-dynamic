@@ -1,0 +1,6 @@
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '../../../../lib/supabaseAdmin'
+import { requireAdmin } from '../../../../lib/adminAuth'
+export async function GET(){ try{ requireAdmin() }catch{ return NextResponse.json({ error:'Unauthorized' }, { status: 401 }) } const admin=supabaseAdmin(); const { data, error }=await admin.from('partners').select('*').order('created_at',{ ascending:false }); if(error) return NextResponse.json({ error: error.message }, { status: 400 }); return NextResponse.json({ items: data||[] }) }
+export async function POST(req){ try{ requireAdmin() }catch{ return NextResponse.json({ error:'Unauthorized' }, { status: 401 }) } const body=await req.json(); const admin=supabaseAdmin(); const { data, error }=await admin.from('partners').upsert(body).select().single(); if(error) return NextResponse.json({ error: error.message }, { status: 400 }); return NextResponse.json(data) }
+export async function DELETE(req){ try{ requireAdmin() }catch{ return NextResponse.json({ error:'Unauthorized' }, { status: 401 }) } const { searchParams } = new URL(req.url); const id=searchParams.get('id'); const admin=supabaseAdmin(); const { error }=await admin.from('partners').delete().eq('id', id); if(error) return NextResponse.json({ error: error.message }, { status: 400 }); return NextResponse.json({ ok:true }) }

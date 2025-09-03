@@ -1,0 +1,2 @@
+import { NextResponse } from 'next/server'; import type { NextRequest } from 'next/server'; import crypto from 'crypto'
+export function middleware(req: NextRequest){ const url=req.nextUrl; if(url.pathname.startsWith('/admin') && !url.pathname.startsWith('/admin/login')){ const ck=req.cookies.get('admintoken')?.value; const secret=process.env.ADMIN_SECRET||''; const expected=crypto.createHash('sha256').update(secret).digest('hex'); if(!ck || ck!==expected) return NextResponse.redirect(new URL('/admin/login', req.url)) } return NextResponse.next() }

@@ -1,0 +1,8 @@
+@tailwind base; @tailwind components; @tailwind utilities;
+body { @apply bg-white text-gray-900; }
+.container { @apply max-w-6xl mx-auto px-4; }
+a { @apply text-blue-600 hover:underline; }
+.btn { @apply px-4 py-2 rounded text-white bg-blue-600 hover:bg-blue-700; }
+.input { @apply border p-2 rounded; }
+.table { @apply w-full text-sm border; }
+.th,.td { @apply border p-2; }
